@@ -89,7 +89,11 @@ const START_CASH=10000;
 let cash=Number(localStorage.getItem("swingai_cash"));
 if(!Number.isFinite(cash))cash=START_CASH;
 
-let positions=JSON.parse(localStorage.getItem("swingai_positions")||"[]");
+let positions=JSON.parse(localStorage.getItem("if(cash===0 && positions.length===0){
+if(cash===0 && positions.length===0){
+cash=START_CASH;
+save();
+}
 let selected=null;
 
 const kr=n=>Number(n).toLocaleString("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2})+" kr";
