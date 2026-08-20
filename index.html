@@ -2,22 +2,72 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SwingAI</title>
 <style>
-body{margin:0;background:#080d1f;color:#f5f7ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{max-width:760px;margin:auto;padding:25px 18px}h1{font-size:38px;margin:0}.sub,.note{color:#9da9c4}.card{background:#141c33;border:1px solid #283653;border-radius:24px;padding:20px;margin:16px 0}.top,.market{display:flex;justify-content:space-between;align-items:center}.badge,.buy{background:#0b4a36;color:#65e6aa;padding:10px 16px;border-radius:15px;font-weight:800}.status{background:#51400a;color:#ffd45c;padding:10px 15px;border-radius:15px}button{width:100%;border:0;border-radius:17px;padding:16px;background:#5d7cff;color:white;font-size:18px;font-weight:800}.signal{border:1px solid #283653;border-radius:20px;padding:16px;margin-top:14px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cell{background:#0c1226;border-radius:14px;padding:13px}.label{color:#9da9c4}.value{font-size:20px;font-weight:800}.score{font-size:45px;font-weight:900}
+*{box-sizing:border-box}body{margin:0;background:#080d1f;color:#f5f7ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:760px;margin:auto;padding:25px 18px 45px}h1{font-size:38px;margin:0}.sub,.note{color:#9da9c4}.card{background:#141c33;border:1px solid #283653;border-radius:24px;padding:20px;margin:16px 0}.top,.market{display:flex;justify-content:space-between;align-items:center;gap:12px}.badge{background:#0b4a36;color:#65e6aa;padding:10px 16px;border-radius:15px;font-weight:800}.status{background:#51400a;color:#ffd45c;padding:10px 15px;border-radius:15px;white-space:nowrap}button{width:100%;border:0;border-radius:17px;padding:16px;background:#5d7cff;color:white;font-size:18px;font-weight:800}.signal{border:1px solid #283653;border-radius:20px;padding:16px;margin-top:14px}.buy{display:block;width:100%;border:0;background:#0b5a40;color:#65e6aa;padding:15px;border-radius:17px;font-weight:900;font-size:18px;text-align:center;margin:14px 0;cursor:pointer}.buy:active{transform:scale(.99);opacity:.85}.buy.done{background:#283653;color:#9da9c4;cursor:default}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cell{background:#0c1226;border-radius:14px;padding:13px}.label{color:#9da9c4}.value{font-size:20px;font-weight:800}.score{font-size:45px;font-weight:900}.portfolio{display:grid;grid-template-columns:1fr 1fr;gap:10px}.balance{background:#0c1226;border-radius:15px;padding:15px}.position{border:1px solid #283653;border-radius:18px;padding:15px;margin-top:12px}.sell{background:#6a2630;color:#ffb5bd;border:0;border-radius:14px;padding:12px;width:100%;font-weight:800;margin-top:10px}.small{font-size:13px;color:#9da9c4}
 </style>
 </head>
 <body><main>
-<div class="top"><div><h1>SwingAI 📈</h1><div class="sub">Live scanner • Paper Trading</div></div><div class="badge">LEVEL 2</div></div>
-<div class="card"><div class="market"><h2>بازار سوئد 🇸🇪</h2><div class="status" id="status">آماده</div></div><p class="note">نسخه آزمایشی؛ هیچ خرید واقعی انجام نمی‌شود.</p><button onclick="scan()">🔄 اسکن بازار</button></div>
+<div class="top"><div><h1>📈 SwingAI</h1><div class="sub">Live scanner • Paper Trading</div></div><div class="badge">LEVEL 2</div></div>
+
+<div class="card"><div class="market"><h2>بازار سوئد 🇸🇪</h2><div class="status" id="status">آماده</div></div><p class="note">نسخه آزمایشی؛ هیچ خرید واقعی انجام نمی‌شود.</p><button id="scanBtn">🔄 اسکن بازار</button></div>
+
 <div class="card"><div class="market"><h2>🔥 بهترین سیگنال‌ها</h2><span class="sub" id="time"></span></div><div id="signals"><p class="note">برای شروع اسکن بازار را بزن.</p></div></div>
-<div class="card"><div class="market"><b>💰 Paper Trading</b><b>10,000 kr</b></div><p class="note">تمام معاملات این نسخه آزمایشی هستند.</p></div>
-<div class="card"><h3>🔔 Sell Engine</h3><p class="note">Target و Stop برای معاملات آزمایشی ثبت می‌شوند.</p></div>
+
+<div class="card"><div class="market"><b>💰 Paper Trading</b><b id="cash">10,000 kr</b></div><p class="note">تمام معاملات این نسخه آزمایشی هستند.</p><div class="portfolio"><div class="balance"><div class="label">سرمایه اولیه</div><div class="value">10,000 kr</div></div><div class="balance"><div class="label">معاملات باز</div><div class="value" id="openCount">0</div></div></div></div>
+
+<div class="card"><h3>📌 Open Positions</h3><div id="positions"><p class="note">هنوز معامله‌ای باز نیست.</p></div></div>
+
+<div class="card"><h3>🔔 Sell Engine</h3><p class="note">Target و Stop برای معاملات آزمایشی ثبت می‌شوند. فروش واقعی انجام نمی‌شود.</p></div>
 <p class="note" style="text-align:center">⚠️ ابزار تحقیقاتی/آزمایشی است و توصیه سرمایه‌گذاری نیست.</p>
 </main>
 <script>
-const d=[["Volvo B","VOLV-B.ST",88,312.4,304,337,"1:2.93"],["Sandvik","SAND.ST",82,241.8,233,265,"1:2.64"]];
-function scan(){status.textContent="در حال بررسی…";setTimeout(()=>{status.textContent="اسکن کامل شد ✓";time.textContent=new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});signals.innerHTML=d.map(x=>`<div class="signal"><div class="market"><span class="score">${x[2]}</span><div><h2>${x[0]}</h2><div class="sub">${x[1]}</div></div></div><div class="buy">BUY candidate</div><div class="row">${[["Entry",x[3]],["Stop",x[4]],["Target",x[5]],["R/R",x[6]]].map(y=>`<div class="cell"><div class="label">${y[0]}</div><div class="value">${typeof y[1]=="number"?y[1].toFixed(2)+" kr":y[1]}</div></div>`).join("")}</div></div>`).join("")},700)}
+const START_CASH=10000;
+const d=[
+{name:"Volvo B",ticker:"VOLV-B.ST",score:88,entry:312.4,stop:304,target:337,rr:"1:2.93"},
+{name:"Sandvik",ticker:"SAND.ST",score:82,entry:241.8,stop:233,target:265,rr:"1:2.64"}
+];
+let state=JSON.parse(localStorage.getItem("swingai_state")||"null")||{cash:START_CASH,positions:[]};
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("swingai_state",JSON.stringify(state));renderPortfolio()}
+function kr(n){return Number(n).toLocaleString("sv-SE",{maximumFractionDigits:2})+" kr"}
+function renderPortfolio(){
+$("cash").textContent=kr(state.cash);$("openCount").textContent=state.positions.length;
+const box=$("positions");
+if(!state.positions.length){box.innerHTML='<p class="note">هنوز معامله‌ای باز نیست.</p>';return}
+box.innerHTML=state.positions.map((p,i)=>`<div class="position"><div class="market"><b>${p.name}</b><span>${p.qty} سهم</span></div><div class="small">Entry: ${kr(p.entry)} • Stop: ${kr(p.stop)} • Target: ${kr(p.target)}</div><div class="small">سرمایه معامله: ${kr(p.cost)}</div><button class="sell" data-sell="${i}">فروش آزمایشی</button></div>`).join("")
+}
+function buy(i){
+const x=d[i];
+if(state.positions.some(p=>p.ticker===x.ticker)){alert("این سهم قبلاً در معاملات باز قرار دارد.");return}
+const riskBudget=START_CASH*0.01,riskPerShare=x.entry-x.stop;
+let qty=Math.floor(riskBudget/riskPerShare);if(qty<1)qty=1;
+let cost=qty*x.entry;
+if(cost>state.cash){qty=Math.floor(state.cash/x.entry);cost=qty*x.entry}
+if(qty<1){alert("موجودی Paper Trading برای این معامله کافی نیست.");return}
+if(!confirm(`خرید آزمایشی ${qty} سهم ${x.name} با قیمت ${kr(x.entry)} انجام شود؟\n\nمبلغ معامله: ${kr(cost)}\nStop: ${kr(x.stop)}\nTarget: ${kr(x.target)}`))return;
+state.cash-=cost;
+state.positions.push({name:x.name,ticker:x.ticker,qty,entry:x.entry,stop:x.stop,target:x.target,cost,time:new Date().toISOString()});
+save();renderSignals();
+alert(`✅ Paper Trade ثبت شد\n\n${x.name}\n${qty} سهم\nمبلغ: ${kr(cost)}\n\nموجودی باقی‌مانده: ${kr(state.cash)}`)
+}
+function sell(i){
+const p=state.positions[i];if(!p)return;
+if(!confirm(`فروش آزمایشی ${p.qty} سهم ${p.name} با قیمت Entry انجام شود؟`))return;
+state.cash+=p.cost;state.positions.splice(i,1);save()
+}
+function renderSignals(){
+$("signals").innerHTML=d.map((x,i)=>{
+const open=state.positions.some(p=>p.ticker===x.ticker);
+return `<div class="signal"><div class="market"><span class="score">${x.score}</span><div><h2>${x.name}</h2><div class="sub">${x.ticker}</div></div></div><button class="buy ${open?'done':''}" data-buy="${i}" ${open?'disabled':''}>${open?'✅ معامله باز است':'BUY candidate'}</button><div class="row">${[["Entry",x.entry],["Stop",x.stop],["Target",x.target],["R/R",x.rr]].map(y=>`<div class="cell"><div class="label">${y[0]}</div><div class="value">${typeof y[1]==="number"?kr(y[1]):y[1]}</div></div>`).join("")}</div></div>`
+}).join("")
+}
+$("scanBtn").addEventListener("click",()=>{
+$("status").textContent="در حال بررسی…";$("scanBtn").disabled=true;
+setTimeout(()=>{$("status").textContent="اسکن کامل شد ✓";$("time").textContent=new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});renderSignals();$("scanBtn").disabled=false},700)
+});
+$("signals").addEventListener("click",e=>{const b=e.target.closest("[data-buy]");if(b&&!b.disabled)buy(Number(b.dataset.buy))});
+$("positions").addEventListener("click",e=>{const b=e.target.closest("[data-sell]");if(b)sell(Number(b.dataset.sell))});
+renderPortfolio();
 </script></body></html>
