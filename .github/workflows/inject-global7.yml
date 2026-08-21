@@ -30,3 +30,4 @@ jobs:
           git add index.html
           git diff --cached --quiet || git commit -m 'Inject global 7-market scanner'
           git push
+# retrigger
