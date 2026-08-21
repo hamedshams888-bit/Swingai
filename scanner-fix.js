@@ -1,6 +1,6 @@
 (()=>{
   let running=false,timer=null,observer=null;
-  const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};
+  const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden';};
   const scanButtons=()=>[...document.querySelectorAll('button')].filter(visible).filter(b=>/اسکن|scan/i.test((b.textContent||'')));
   const signature=()=>[...document.querySelectorAll('.global-signal,.signal,.opportunity-card')].filter(visible).map(c=>(c.textContent||'').replace(/\s+/g,' ').trim()).join('|');
   function ensureStatus(){
@@ -12,20 +12,26 @@
   function finish(btn,ok,msg){running=false;if(timer){clearTimeout(timer);timer=null}if(observer){observer.disconnect();observer=null}btn.disabled=false;btn.style.opacity='1';btn.textContent='🔄 اسکن جهانی بازار';status(msg||(ok?'✅ اسکن کامل شد':'❌ اسکن متوقف شد'),ok)}
   function wire(btn){
     if(btn.dataset.scanFix==='1')return;btn.dataset.scanFix='1';
+    // IMPORTANT: use bubble phase. The old capture listener disabled the button
+    // before the inline onclick="scan()" handler could run.
     btn.addEventListener('click',()=>{
       if(running){status('⏳ اسکن هنوز در حال اجراست؛ لطفاً صبر کن.');return}
-      running=true;btn.disabled=true;btn.style.opacity='.65';btn.textContent='⏳ در حال اسکن...';status('⏳ اسکن جهانی شروع شد… دریافت داده‌ها');
-      const started=Date.now(),baseline=signature();let seenLoading=false;
-      observer=new MutationObserver(()=>{
-        const now=Date.now(),cards=[...document.querySelectorAll('.global-signal,.signal,.opportunity-card')].filter(visible),loading=[...document.querySelectorAll('.loading')].some(visible);
-        if(loading)seenLoading=true;
-        const changed=signature()!==baseline;
-        if(now-started>1500&&cards.length&&(changed||(seenLoading&&!loading)))finish(btn,true,'✅ اسکن کامل شد — نتایج آماده است');
-        else if(now-started>45000)finish(btn,false,'⚠️ اسکن بیش از ۴۵ ثانیه طول کشید؛ دوباره تلاش کن');
-      });
-      observer.observe(document.body,{childList:true,subtree:true,characterData:true});
-      timer=setTimeout(()=>finish(btn,false,'⚠️ اسکن بیش از ۴۵ ثانیه طول کشید؛ پاسخ داده‌ها دیر شد'),46000);
-    },true);
+      // Let the existing inline scan() handler run first.
+      setTimeout(()=>{
+        if(running)return;
+        running=true;btn.disabled=true;btn.style.opacity='.65';btn.textContent='⏳ در حال اسکن...';status('⏳ اسکن جهانی شروع شد… دریافت داده‌ها');
+        const started=Date.now(),baseline=signature();let seenLoading=false;
+        observer=new MutationObserver(()=>{
+          const now=Date.now(),cards=[...document.querySelectorAll('.global-signal,.signal,.opportunity-card')].filter(visible),loading=[...document.querySelectorAll('.loading')].some(visible);
+          if(loading)seenLoading=true;
+          const changed=signature()!==baseline;
+          if(now-started>1500&&cards.length&&(changed||(seenLoading&&!loading)))finish(btn,true,'✅ اسکن کامل شد — نتایج آماده است');
+          else if(now-started>45000)finish(btn,false,'⚠️ اسکن بیش از ۴۵ ثانیه طول کشید؛ دوباره تلاش کن');
+        });
+        observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+        timer=setTimeout(()=>finish(btn,false,'⚠️ اسکن بیش از ۴۵ ثانیه طول کشید؛ پاسخ داده‌ها دیر شد'),46000);
+      },0);
+    });
   }
   function boot(){scanButtons().forEach(wire);new MutationObserver(()=>scanButtons().forEach(wire)).observe(document.body,{childList:true,subtree:true})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
