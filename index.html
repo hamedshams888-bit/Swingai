@@ -61,7 +61,7 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#283653}.buybtn{bac
   <button class="secondary" type="button" onclick="renderPositions();toast('پوزیشن‌ها بررسی شدند.')">🔄 بررسی پوزیشن‌ها</button>
 </div>
 <p class="note" style="text-align:center">⚠️ ابزار تحقیقاتی/آزمایشی است و توصیه سرمایه‌گذاری نیست.</p>
-</main>
+<div class="card" id="positionsServiceBtn"><h3>📡 سرویس وضعیت خریدها</h3><p class="note">قیمت فعلی، سود/زیان، Target و Stop خریدهای Paper Trading را آنلاین ببین.</p><a href="positions.html" style="display:block;text-decoration:none;text-align:center;background:#5d7cff;color:#fff;border-radius:17px;padding:16px;font-size:18px;font-weight:800">📡 وضعیت آنلاین خریدها</a></div></main>
 <div id="modal" class="modal">
 <div class="sheet">
   <div class="market"><h2 id="modalTitle">Paper Trade</h2><button class="secondary" style="width:auto;padding:9px 13px" type="button" onclick="closeModal()">✕</button></div>
@@ -137,5 +137,5 @@ function renderPositions(){document.getElementById('cash').textContent=fmt(cash,
 function toast(msg,error=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=error?'#6b2631':'#0b4a36';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 initMarkets();renderPositions();
 </script>
-</body>
+<script src="global7.js?v=aab2cfc41da0"></script><script src="cleanup-old-scanner.js?v=aab2cfc41da0"></script><script src="global7_patch.js?v=aab2cfc41da0"></script><script src="scanner-fix.js?v=aab2cfc41da0"></script></body>
 </html>
