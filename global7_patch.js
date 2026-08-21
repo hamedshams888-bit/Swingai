@@ -8,8 +8,10 @@
     const price=(t.match(new RegExp(cur+'\\s*([0-9]+(?:[.,][0-9]+)?)'))||[])[1];
     const target=(t.match(/Target\s*([A-Z]{3})?\s*([0-9]+(?:[.,][0-9]+)?)/i)||[])[2];
     const stop=(t.match(/Stop\s*([A-Z]{3})?\s*([0-9]+(?:[.,][0-9]+)?)/i)||[])[2];
+    const score=(t.match(/(?:^|\s)([0-9]{2,3})(?:\s|$)/)||[])[1];
+    const action=/\bBUY\b/.test(t)?'BUY':/\bWATCH\b/.test(t)?'WATCH':'PASS';
     const name=(t.split(/\b(?:USA|US|SE|DE|JP|CA|AU|HK)\b/)[0]||'Global signal').trim().slice(-40);
-    return {name,symbol,currency:cur,price:Number((price||'0').replace(',','.')),target:Number((target||'0').replace(',','.')),stop:Number((stop||'0').replace(',','.'))};
+    return {name,symbol,currency:cur,price:Number((price||'0').replace(',','.')),target:Number((target||'0').replace(',','.')),stop:Number((stop||'0').replace(',','.')),score:Number(score||0),action};
   }
   function showTrade(card){
     const s=parseCard(card); if(!s.price) return;
@@ -37,17 +39,30 @@
       toast.textContent='✅ Paper Trade ثبت شد: '+s.symbol+' × '+q; toast.className='sgt-toast'; setTimeout(()=>toast.remove(),3000);
     };
   }
+  function cards(){return [...document.querySelectorAll('.signal, .global-signal, .opportunity-card')].filter(c=>!c.closest('#swingaiBest'))}
+  function renderBest(){
+    const heading=[...document.querySelectorAll('h1,h2,h3,h4')].find(h=>(h.textContent||'').includes('بهترین فرصت‌ها'));
+    if(!heading)return;
+    let box=document.getElementById('swingaiBest');
+    if(!box){box=document.createElement('div');box.id='swingaiBest';heading.parentElement.insertAdjacentElement('afterend',box)}
+    const all=cards().map(c=>{const x=parseCard(c);x._card=c;return x}).filter(x=>x.price>0).sort((a,b)=>b.score-a.score);
+    const buys=all.filter(x=>x.action==='BUY').slice(0,3), watches=all.filter(x=>x.action==='WATCH').slice(0,2), list=[...buys,...watches];
+    if(!list.length){box.innerHTML='<div class="sgt-empty">⛔ هنوز نتیجه‌ای نیست — اسکن جهانی را اجرا کن.</div>';return}
+    const row=x=>'<div class="sgt-best-row"><div><b>'+(x.action==='BUY'?'🟢':'🟡')+' '+esc(x.name)+'</b><span>'+esc(x.symbol)+' • '+x.currency+' • Score '+x.score+'</span></div><strong>'+x.action+'</strong></div>';
+    box.innerHTML='<div class="sgt-best-title">🎯 انتخاب نهایی موتور</div>'+list.map(row).join('')+(buys.length?'<div class="sgt-best-note">🥇 تا ۳ BUY برتر و سپس بهترین WATCHها نمایش داده می‌شوند.</div>':'<div class="sgt-best-note">⛔ امروز BUY باکیفیت پیدا نشد؛ فقط WATCHهای برتر نمایش داده می‌شوند.</div>');
+  }
   function wire(){
-    document.querySelectorAll('.signal, .global-signal, .opportunity-card').forEach(function(card){
+    cards().forEach(function(card){
       if(card.dataset.paperWired==='1') return;
       const text=card.textContent||'';
       if(!/\bBUY\b/.test(text)) return;
       const b=document.createElement('button'); b.type='button'; b.className='buybtn swingai-paper-buy'; b.textContent='🛒 خرید با Paper Trading'; b.onclick=()=>showTrade(card); card.appendChild(b); card.dataset.paperWired='1';
     });
+    renderBest();
   }
   function start(){
-    const css=document.createElement('style'); css.textContent='#swingaiGlobalTrade{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-end;padding:16px}.sgt-sheet{width:min(820px,100%);margin:auto;background:#141c33;color:#fff;border:1px solid #334364;border-radius:24px;padding:20px}.sgt-head{display:flex;justify-content:space-between;align-items:center;font-size:22px}.sgt-head button{background:#283653;color:#fff;border:0;border-radius:10px;padding:8px}.sgt-sheet label{display:block;margin-top:16px;color:#9da9c4}.sgt-sheet input{width:100%;background:#0c1226;color:#fff;border:1px solid #334364;border-radius:12px;padding:13px;font-size:18px;margin:8px 0 14px}.sgt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.sgt-grid div{background:#0c1226;border-radius:14px;padding:12px}.sgt-sheet>#sgtConfirm{width:100%;border:0;border-radius:15px;padding:15px;background:#0b4a36;color:#65e6aa;font-size:17px;font-weight:800}.sgt-toast{position:fixed;top:20px;left:20px;right:20px;z-index:10000;background:#0b4a36;color:#dfffee;border:1px solid #2c8c68;border-radius:15px;padding:14px;text-align:center;font-weight:800}'; document.head.appendChild(css);
-    wire(); new MutationObserver(wire).observe(document.body,{childList:true,subtree:true});
+    const css=document.createElement('style'); css.textContent='#swingaiGlobalTrade{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-end;padding:16px}.sgt-sheet{width:min(820px,100%);margin:auto;background:#141c33;color:#fff;border:1px solid #334364;border-radius:24px;padding:20px}.sgt-head{display:flex;justify-content:space-between;align-items:center;font-size:22px}.sgt-head button{background:#283653;color:#fff;border:0;border-radius:10px;padding:8px}.sgt-sheet label{display:block;margin-top:16px;color:#9da9c4}.sgt-sheet input{width:100%;background:#0c1226;color:#fff;border:1px solid #334364;border-radius:12px;padding:13px;font-size:18px;margin:8px 0 14px}.sgt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.sgt-grid div{background:#0c1226;border-radius:14px;padding:12px}.sgt-sheet>#sgtConfirm{width:100%;border:0;border-radius:15px;padding:15px;background:#0b4a36;color:#65e6aa;font-size:17px;font-weight:800}.sgt-best-title{font-size:18px;font-weight:900;margin:12px 0}.sgt-best-row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0c1226;border:1px solid #283653;border-radius:15px;padding:13px;margin:8px 0}.sgt-best-row span{display:block;color:#9da9c4;font-size:12px;margin-top:4px}.sgt-best-row strong{padding:8px 11px;border-radius:10px;background:#0b4a36;color:#65e6aa}.sgt-best-note,.sgt-empty{background:#0c1226;border-radius:14px;padding:11px;color:#9da9c4;font-size:13px;margin-top:10px}.sgt-toast{position:fixed;top:20px;left:20px;right:20px;z-index:10000;background:#0b4a36;color:#dfffee;border:1px solid #2c8c68;border-radius:15px;padding:14px;text-align:center;font-weight:800}'; document.head.appendChild(css);
+    wire(); renderBest(); new MutationObserver(wire).observe(document.body,{childList:true,subtree:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
