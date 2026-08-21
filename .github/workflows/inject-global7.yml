@@ -5,6 +5,7 @@ on:
     paths:
       - global7.js
       - cleanup-old-scanner.js
+      - scanner-fix.js
       - .github/workflows/inject-global7.yml
 permissions:
   contents: write
@@ -19,7 +20,7 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text()
-          for tag in ['<script src="global7.js"></script>','<script src="cleanup-old-scanner.js"></script>']:
+          for tag in ['<script src="global7.js"></script>','<script src="cleanup-old-scanner.js"></script>','<script src="scanner-fix.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>',tag+'</body>')
           p.write_text(s)
@@ -29,5 +30,5 @@ jobs:
           git config user.name 'SwingAI Bot'
           git config user.email 'swingai-bot@users.noreply.github.com'
           git add index.html
-          git diff --cached --quiet || git commit -m 'Remove duplicate legacy market scanner'
+          git diff --cached --quiet || git commit -m 'Fix Global 7 scan button feedback'
           git push
